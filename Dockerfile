@@ -1,3 +1,15 @@
+FROM python:3.12
+
+WORKDIR /app/Script
+
+COPY Script/pyproject.toml ./
+
+RUN pip install poetry
+RUN poetry cache clear --all pypi
+RUN poetry install -vvv
+
+ENV PYTHONPATH="/app:${PYTHONPATH}"
+
 FROM mcr.microsoft.com/dotnet/sdk:8.0
 
 WORKDIR /app
@@ -15,6 +27,9 @@ COPY . ./
 
 RUN dotnet publish ./API/API.csproj -c Release -o /app/publish
 
-ENTRYPOINT ["dotnet", "/app/publish/API.dll"]
+ENTRYPOINT ["dotnet", "/app/publish/API.dll"] 
 
 EXPOSE 8080
+
+
+
