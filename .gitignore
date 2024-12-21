@@ -393,3 +393,7 @@ FodyWeavers.xsd
 *.sln.iml
 
 API/appsettings.Development.json
+
+# Python
+/Script/venv
+/venv
