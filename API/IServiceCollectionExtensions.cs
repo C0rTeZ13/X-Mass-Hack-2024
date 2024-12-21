@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using ServiceLayer.Services.Authentication.Concrete;
 using ServiceLayer.Services.Authentication;
+using ServiceLayer.Services;
 
 namespace API
 {
@@ -20,6 +21,10 @@ namespace API
             services.AddScoped<ISignInService, SignInService>();
             services.AddScoped<ITokenService, JwtTokenService>();
             services.AddScoped<IUserClaimsService, UserClaimsService>();
+
+            services.AddScoped<VbankcenterParserService, VbankcenterParserService>();
+            services.AddScoped<ScoringService, ScoringService>();
+            services.AddScoped<XlsFileService, XlsFileService>();
         }
 
         public static void ConfigureApp(this IServiceCollection services, IConfiguration configuration)
