@@ -7,7 +7,6 @@ COPY ./DataLayer/DataLayer.csproj ./DataLayer/
 COPY ./ServiceLayer/ServiceLayer.csproj ./ServiceLayer/
 COPY ./API/appsettings.json /app/appsettings.json
 
-
 RUN dotnet restore ./API/API.csproj
 RUN dotnet restore ./DataLayer/DataLayer.csproj
 RUN dotnet restore ./ServiceLayer/ServiceLayer.csproj

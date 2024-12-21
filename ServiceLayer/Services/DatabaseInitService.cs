@@ -2,11 +2,10 @@
 using DataLayer.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ServiceLayer.Constants;
-using ServiceLayer.Extensions;
 using ServiceLayer.Models.Settings;
 
 namespace ServiceLayer.Services
@@ -17,52 +16,109 @@ namespace ServiceLayer.Services
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly AppDbContext _dbContext;
         private readonly SuperuserSettings _adminSettings;
+        private readonly ILogger<DatabaseInitService> _logger;
 
-        public DatabaseInitService(IServiceScopeFactory serviceScopeFactory, IOptions<SuperuserSettings> options)
+        public DatabaseInitService(
+            UserManager<AppUser> userManager, 
+            RoleManager<IdentityRole> roleManager, 
+            AppDbContext dbContext, 
+            IOptions<SuperuserSettings> adminSettings,
+            ILogger<DatabaseInitService> logger)
         {
-            var scope = serviceScopeFactory.CreateScope();
-            _userManager = scope.ServiceProvider.GetService<UserManager<AppUser>>();
-            _roleManager = scope.ServiceProvider.GetService<RoleManager<IdentityRole>>();
-            _dbContext = scope.ServiceProvider.GetService<AppDbContext>();
-            _adminSettings = options.Value;
+            _userManager = userManager;
+            _roleManager = roleManager;
+            _dbContext = dbContext;
+            _adminSettings = adminSettings.Value;
+            _logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await MigrateDatabaseAsync();
-            await SeedDatabaseDataAsync();
+            try
+            {
+                await MigrateDatabaseAsync();
+                await SeedDatabaseDataAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred during database initialization.");
+                throw;
+            }
         }
 
         private async Task MigrateDatabaseAsync()
         {
-            await _dbContext.Database.MigrateAsync();
+            try
+            {
+                _logger.LogInformation("Migrating database...");
+                await _dbContext.Database.MigrateAsync();
+                _logger.LogInformation("Database migration completed.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred during database migration.");
+                throw;
+            }
         }
 
         private async Task SeedDatabaseDataAsync()
         {
-            foreach (var role in AppRoles.AllRoles())
+            try
             {
-                IdentityRole? identity_role = await _roleManager.FindByNameAsync(role);
-                if (identity_role == null)
+                // Ensure roles are created
+                foreach (var role in AppRoles.AllRoles())
                 {
-                    IdentityResult result = await _roleManager.CreateAsync(new IdentityRole(role));
-                    if (!result.Succeeded) throw new Exception(result.GetMessage());
+                    IdentityRole? identity_role = await _roleManager.FindByNameAsync(role);
+                    if (identity_role == null)
+                    {
+                        IdentityResult result = await _roleManager.CreateAsync(new IdentityRole(role));
+                        if (!result.Succeeded)
+                        {
+                            _logger.LogError("Failed to create role {Role}", role);
+                            throw new Exception($"Failed to create role {role}");
+                        }
+                    }
+                }
+
+                // Ensure superuser exists
+                if (string.IsNullOrEmpty(_adminSettings.UserName) || string.IsNullOrEmpty(_adminSettings.Password))
+                {
+                    throw new ArgumentNullException("SuperuserSettings", "UserName or Password cannot be null or empty.");
+                }
+
+                AppUser? adminUser = await _userManager.FindByNameAsync(_adminSettings.UserName);
+                if (adminUser == null)
+                {
+                    adminUser = new AppUser()
+                    {
+                        UserName = _adminSettings.UserName,
+                    };
+
+                    IdentityResult result = await _userManager.CreateAsync(adminUser, _adminSettings.Password);
+                    if (!result.Succeeded)
+                    {
+                        _logger.LogError("Failed to create superuser.");
+                        throw new Exception("Failed to create superuser.");
+                    }
+
+                    result = await _userManager.AddToRoleAsync(adminUser, AppRoles.Admin);
+                    if (!result.Succeeded)
+                    {
+                        _logger.LogError("Failed to add superuser to role {Role}", AppRoles.Admin);
+                        throw new Exception("Failed to add superuser to role.");
+                    }
+
+                    _logger.LogInformation("Superuser created successfully.");
+                }
+                else
+                {
+                    _logger.LogInformation("Superuser already exists.");
                 }
             }
-
-            AppUser? adminUser = await _userManager.FindByNameAsync(_adminSettings.UserName);
-            if (adminUser == null)
+            catch (Exception ex)
             {
-                adminUser = new AppUser()
-                {
-                    UserName = _adminSettings.UserName,
-                };
-
-                IdentityResult result = await _userManager.CreateAsync(adminUser, _adminSettings.Password);
-                if (!result.Succeeded) throw new Exception(result.GetMessage());
-
-                result = await _userManager.AddToRoleAsync(adminUser, AppRoles.Admin);
-                if (!result.Succeeded) throw new Exception(result.GetMessage());
+                _logger.LogError(ex, "An error occurred during data seeding.");
+                throw;
             }
         }
     }

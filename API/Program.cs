@@ -1,5 +1,6 @@
 using DataLayer;
 using Microsoft.EntityFrameworkCore;
+using ServiceLayer.Models.Settings;
 using ServiceLayer.Services;
 
 namespace API
@@ -10,11 +11,13 @@ namespace API
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.Configure<SuperuserSettings>(builder.Configuration.GetSection("SuperuserSettings"));
+
             builder.Services.AddControllers();
             builder.Services.AddAppSwagger();
             builder.Services.AddAppServices();
             builder.Services.AddAppIdentity();
-            builder.Services.ConfigureApp(builder.Configuration);
+            builder.Services.ConfigureApp(builder.Configuration); 
             builder.Services.AddAppDbContext(builder.Configuration);
             builder.Services.AddAppAuthentication(builder.Configuration);
             builder.Services.AddHostedService<DatabaseInitService>();
