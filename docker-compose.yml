@@ -6,7 +6,6 @@ services:
       - "8080:8080"
     depends_on:
       - postgres
-    entrypoint: 
 
   postgres:
     image: postgres:15
