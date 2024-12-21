@@ -4,6 +4,13 @@ import numpy as np
 pd.set_option('display.max_columns', None)
 
 data = pd.read_csv("data.csv")
+
+ocved_dop = pd.DataFrame()
+ocved_dop["Основной ОКВЭД"] = data["Основной ОКВЭД"].unique()
+ocved_dop = ocved_dop.sort_values(by="Основной ОКВЭД")
+ocved = pd.DataFrame(columns=ocved_dop["Основной ОКВЭД"])
+ocved.loc[0] = range(1, len(ocved_dop["Основной ОКВЭД"]) + 1)
+
 data = data.head(20000)
 parse = pd.read_csv("parsing.csv")
 
@@ -20,7 +27,7 @@ data["Кол-во сотрудников"] = data.apply(lambda r: r["EmemployeeC
 
 del_props = ["ИНН", "Дата регистрации", "Уставной капитал (руб)", "Адрес", "ФИО Генерального директора", "Дата рождения Генерального директора",
              "ФИО Бенефициара", "Сайт", "Номер телефона", "Провайдер", "Деятельность клиента", "Деятельность клиента со слов клиента",
-             "Кол-во сотрудников со слов клиента", " Срок жизни SIM-карты/номера (от даты замены e/SIM-карты)",
+             "Кол-во сотрудников со слов клиента", "Срок жизни SIM-карты/номера (от даты замены e/SIM-карты)",
              "Срок жизни SIM в текущем пользовательском устройстве",
              "Срок жизни SIM-карты/номера (количество дней/часов/минут, которое прошло от даты заключения договора)", "Revenue", "ActivityCode", "EmemployeeCount"]
 
@@ -38,7 +45,7 @@ bins = [0, 10, 30, 100, float('inf')]
 labels = [0.5, 0, 0.5, 1]
 data["Кол-во дополнительных ОКВЭДОВ"] = pd.cut(data["Кол-во дополнительных ОКВЭДОВ"], bins=bins, labels=labels, right=False, ordered=False)
 
-data["Система налогообложения "] = data["Система налогообложения "].apply(lambda x: 1 if x != 0 else 0)
+data["Система налогообложения"] = data["Система налогообложения"].apply(lambda x: 1 if x != 0 else 0)
 data["Вся негативная информация"] = data["Вся негативная информация"].apply(lambda x: 1 if x != 0 else 0)
 
 data["Отношение оборотов"] = np.where((data["Планируемый оборот по анкете (руб)"] == 0) & (data["Планируемый оборот по снятию д/с (руб)"] == 0), 1,
@@ -77,10 +84,12 @@ for index, row in data.iterrows():
     if index % 10000 == 0:
         print(index)
 
-data["result"] = data["score"].apply(lambda x: 0 if x > (data["score"].min() + data["score"].max()) / 2 else 1)
+line = data["score"].min() + abs(data["score"].max() - data["score"].min()) * 0.4
+data["result"] = data["score"].apply(lambda x: 0 if x > line else 1)
 
 data.to_csv('output.csv', index=False)
 min_max.to_csv('min_max.csv', index=False)
+ocved.to_csv('ocved.csv', index=False)
 
 print(data["score"].min())
 print(data["score"].max())
