@@ -43,7 +43,7 @@ namespace ServiceLayer.Services
 
         public async Task ExecuteScoring(string path)
         {
-            string arguments = $"\"{_scriptPath}\" \"{path}\"";
+            string arguments = $"\"{_scriptPath}\" \"{path}\" \"{path}\"";
 
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
