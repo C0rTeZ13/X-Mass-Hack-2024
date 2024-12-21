@@ -48,6 +48,32 @@ def proccess(filePath, normalize, ocved):
     data = pd.read_excel(filePath)
     result_data = data
 
+    columns_to_add = [
+        'ИНН',
+        'Основной ОКВЭД',
+        'Кол-во дополнительных ОКВЭДОВ',
+        'Кол-во сотрудников',
+        'Система налогообложения',
+        ' Планируемый оборот по анкете (руб)',
+        ' Планируемый оборот по снятию д/с (руб)',
+        ' Доходы (тыс, руб.)',
+        'Негативная информация',
+        'Негатив относительно ГД',
+        'Мошенники',
+        'Сервисы регистраторы',
+        'Налоговая нагрузка',
+        'Оценка надежности',
+        'Возможная сумма при 3%',
+        ]
+
+    # Добавление пустых столбцов
+    for col in columns_to_add:
+        if col not in data.columns:
+            data = data.assign(**{col: None})
+
+    data["Оценка надежности"].fillna(0.2, inplace=True)
+    data["Возможная сумма при 3%"].fillna(80000, inplace=True)
+
     # Проверка наличия столбца "Основной ОКВЭД"
     if "Основной ОКВЭД" not in data.columns:
         print("Error: 'Основной ОКВЭД' column is missing in the input data.")
@@ -87,11 +113,11 @@ def proccess(filePath, normalize, ocved):
     data["Вся негативная информация"] = data["Негативная информация"].combine_first(data["Негатив относительно ГД"])
     data = data.drop(columns=["Негативная информация", "Негатив относительно ГД"])
 
+    data.fillna(0, inplace=True)
+
     # Удаление лишних столбцов
     data = data.drop(columns=['ИНН'])
     data = data.drop(columns=norm_props)
-
-    data = data.iloc[:, [0, 1, 8, 2, 10, 6, 3, 4, 11, 7, 5, 9]]
 
     # Получение предсказаний
     predictions, probabilities = analys(data)
