@@ -11,8 +11,6 @@ namespace API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.Configure<SuperuserSettings>(builder.Configuration.GetSection("SuperuserSettings"));
-
             builder.Services.AddControllers();
             builder.Services.AddAppSwagger();
             builder.Services.AddAppServices();
