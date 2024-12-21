@@ -97,7 +97,7 @@ def proccess(filePath, normalize, ocved):
     predictions, probabilities = analys(data)
 
     # Добавление предсказаний в данные
-    result_data["Решение"] = predictions
+    result_data["Решение"] = np.where(predictions == 1, "Да", "Нет")
     result_data["Вероятность выдачи кредита"] = probabilities[:, 1]  # Вероятность для класса 1
 
     return result_data
