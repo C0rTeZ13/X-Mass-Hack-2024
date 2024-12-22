@@ -33,10 +33,10 @@ namespace ServiceLayer.Services
                 if (worksheet.Cells["D2"].Value == null) worksheet.Cells["D2"].Value = info?.EmemployeeCount;
                 if (worksheet.Cells["B2"].Value == null) worksheet.Cells["B2"].Value = info?.ActivityCode;
                 if (worksheet.Cells["H2"].Value == null) worksheet.Cells["H2"].Value = info?.Revenue;
-                worksheet.Cells["N1"].Value = "Оценка надежности";
-                worksheet.Cells["N2"].Value = info?.ReliabilityRating;
-                worksheet.Cells["O1"].Value = "Возможная сумма при 3%";
-                worksheet.Cells["O2"].Value = info?.RecommendedDealLimit;
+                worksheet.Cells["O1"].Value = "Оценка надежности";
+                worksheet.Cells["O2"].Value = info?.ReliabilityRating;
+                worksheet.Cells["P1"].Value = "Возможная сумма при 3%";
+                worksheet.Cells["P2"].Value = info?.RecommendedDealLimit;
             }
             package.SaveAs(path);
         }
