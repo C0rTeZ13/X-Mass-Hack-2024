@@ -12,6 +12,8 @@ namespace ServiceLayer.Services
         private readonly VbankcenterParserService _parserService;
         private readonly string _scriptPath;
         private readonly string _pythonPath;
+        private readonly string _min_max;
+        private readonly string _ocved;
 
         public ScoringService(VbankcenterParserService parserService, IConfiguration configuration)
         {
