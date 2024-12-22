@@ -65,6 +65,7 @@ def proccess(filePath, normalize, ocved, modelPath):
         'Мошенники',
         'Сервисы регистраторы',
         'Налоговая нагрузка',
+        'Уставной капитал (руб)',
         'Оценка надежности',
         'Возможная сумма при 3%',
         ]
@@ -85,7 +86,7 @@ def proccess(filePath, normalize, ocved, modelPath):
     # Применение маппинга для ОКВЭД
     data["Основной ОКВЭД"] = data["Основной ОКВЭД"].map(ocved).fillna(-1).astype(int)
 
-    norm_props = ["Доходы (тыс, руб.)", "Налоговая нагрузка", "Кол-во сотрудников", "Возможная сумма при 3%"]
+    norm_props = ["Доходы (тыс, руб.)", "Налоговая нагрузка", "Кол-во сотрудников", "Уставной капитал (руб)", "Возможная сумма при 3%"]
 
     # Логарифмирование и нормализация
     for prop in norm_props:
@@ -96,6 +97,8 @@ def proccess(filePath, normalize, ocved, modelPath):
             ) / (normalize["max"]["Нормализованно " + prop] - normalize["min"]["Нормализованно " + prop])
         else:
             print(f"Warning: Column '{prop}' is missing in the input data.")
+
+    data["Нормализованно Уставной капитал (руб)"] = data["Нормализованно Уставной капитал (руб)"].apply(lambda x: 0 if x < 0.2 else x)
 
     # Преобразование категориальных переменных
     data["Система налогообложения"] = data["Система налогообложения"].astype("category").cat.codes + 1

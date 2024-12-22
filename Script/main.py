@@ -25,7 +25,7 @@ data["Доходы (тыс, руб.)"] = data.apply(lambda r: r["Revenue"] if pd
 data["Основной ОКВЭД"] = data.apply(lambda r: r["ActivityCode"] if pd.isna(r["Основной ОКВЭД"]) else r["Основной ОКВЭД"], axis=1)
 data["Кол-во сотрудников"] = data.apply(lambda r: r["EmemployeeCount"] if pd.isna(r["Кол-во сотрудников"]) else r["Кол-во сотрудников"], axis=1)
 
-del_props = ["ИНН", "Дата регистрации", "Уставной капитал (руб)", "Адрес", "ФИО Генерального директора", "Дата рождения Генерального директора",
+del_props = ["ИНН", "Дата регистрации", "Адрес", "ФИО Генерального директора", "Дата рождения Генерального директора",
              "ФИО Бенефициара", "Сайт", "Номер телефона", "Провайдер", "Деятельность клиента", "Деятельность клиента со слов клиента",
              "Кол-во сотрудников со слов клиента", "Срок жизни SIM-карты/номера (от даты замены e/SIM-карты)",
              "Срок жизни SIM в текущем пользовательском устройстве",
@@ -58,16 +58,18 @@ data.rename(columns={"Rating": "Оценка надежности"}, inplace=Tru
 data.rename(columns={"RecommendedDealLimit": "Возможная сумма при 3%"}, inplace=True)
 
 min_max = pd.DataFrame()
-norm_props = ["Доходы (тыс, руб.)", "Налоговая нагрузка", "Кол-во сотрудников", "Возможная сумма при 3%"]
+norm_props = ["Доходы (тыс, руб.)", "Налоговая нагрузка", "Кол-во сотрудников", "Уставной капитал (руб)", "Возможная сумма при 3%"]
 for prop in norm_props:
     data[prop] = np.log1p(data[prop])
     data["Нормализованно " + prop] = (data[prop] - data[prop].min()) / (data[prop].max() - data[prop].min())
     min_max["Нормализованно " + prop] = [data[prop].min(), data[prop].max()]
 data = data.drop(columns=norm_props)
 
-data = data.iloc[:, [0, 1, 11, 2, 8, 9, 3, 4, 5, 7, 10, 6, 12]]
+data["Нормализованно Уставной капитал (руб)"] = data["Нормализованно Уставной капитал (руб)"].apply(lambda x: 0 if x < 0.2 else x)
 
-weights = [0, 0.2, -0.2, -0.3, 0.3, -0.4, 2, 1, 1, 0.2, -0.5, -2, -0.35]
+data = data.iloc[:, [0, 1, 11, 2, 8, 9, 3, 4, 5, 7, 10, 12, 6, 13]]
+
+weights = [0, 0.2, -0.2, -0.3, 0.3, -0.4, 2, 0.8, 0.6, 0.2, -0.5, -0.1, -2, -0.5]
 weights_categories = pd.DataFrame([weights], columns=data.columns.tolist())
 
 data["score"] = 0.0
