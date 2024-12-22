@@ -4,6 +4,9 @@ import os
 import argparse
 from catboost import CatBoostClassifier
 
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 
 def load_ocved(ocved_path):
     # Загрузка данных
@@ -71,8 +74,8 @@ def proccess(filePath, normalize, ocved, modelPath):
         if col not in data.columns:
             data = data.assign(**{col: None})
 
-    data["Оценка надежности"].fillna(0.2, inplace=True)
-    data["Возможная сумма при 3%"].fillna(80000, inplace=True)
+    data["Оценка надежности"].fillna(0.2)
+    data["Возможная сумма при 3%"].fillna(80000)
 
     # Проверка наличия столбца "Основной ОКВЭД"
     if "Основной ОКВЭД" not in data.columns:
@@ -110,7 +113,7 @@ def proccess(filePath, normalize, ocved, modelPath):
     data = data.drop(columns=["Планируемый оборот по анкете (руб)", "Планируемый оборот по снятию д/с (руб)"])
 
     # Объединение негативной информации
-    data["Вся негативная информация"] = data["Негативная информация"].combine_first(data["Негатив относительно ГД"])
+    data["Вся негативная информация"] = data["Негативная информация"].combine_first(data["Негатив относительно ГД"]).dropna()
     data = data.drop(columns=["Негативная информация", "Негатив относительно ГД"])
 
     data.fillna(0, inplace=True)
