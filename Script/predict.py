@@ -130,16 +130,18 @@ def proccess(filePath, normalize, ocved):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Usage: python script.py /path/to/input.xlsx /path/to/output.xlsx")
+    parser = argparse.ArgumentParser(description="Usage: python script.py /path/to/input.xlsx /path/to/output.xlsx /path/to/min_max.csv /path/to/ocved.csv")
     parser.add_argument("input_path", type=str, help="Path to the input file")
     parser.add_argument("output_path", type=str, help="Path to save the output file")
+    parser.add_argument("min_max_path", type=str, help="Path to min_max file")
+    parser.add_argument("ocved_path", type=str, help="Path to ocved file")
     args = parser.parse_args()
 
     filePath = args.input_path
     outputPath = args.output_path
 
-    minMaxPath = "min_max.csv"
-    ocvedPath = "ocved.csv"
+    minMaxPath = args.min_max_path
+    ocvedPath = args.ocved_path
 
     # Проверка наличия файлов
     if not os.path.exists(filePath):

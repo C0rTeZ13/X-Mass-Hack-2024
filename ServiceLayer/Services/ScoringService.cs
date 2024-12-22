@@ -18,6 +18,8 @@ namespace ServiceLayer.Services
             _parserService = parserService;
             _scriptPath = configuration["ScriptPath"];
             _pythonPath = configuration["PythonPath"];
+            _min_max = configuration["MinMaxPath"];
+            _ocved = configuration["OcvedPath"];
         }
 
         public async Task ComplementCompanyFile(string path)
@@ -43,7 +45,7 @@ namespace ServiceLayer.Services
 
         public async Task ExecuteScoring(string path)
         {
-            string arguments = $"\"{_scriptPath}\" \"{path}\" \"{path}\"";
+            string arguments = $"\"{_scriptPath}\" \"{path}\" \"{path}\" \"{_min_max}\" \"{_ocved}\"";
 
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
