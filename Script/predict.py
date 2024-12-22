@@ -141,7 +141,7 @@ def main():
     outputPath = args.output_path
 
     minMaxPath = args.min_max_path
-    ocvedPath = args.ocved.path
+    ocvedPath = args.ocved_path
 
     # Проверка наличия файлов
     if not os.path.exists(filePath):
