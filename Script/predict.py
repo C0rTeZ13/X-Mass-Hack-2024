@@ -26,6 +26,7 @@ def getMinMax(normalizePath):
         "Нормализованно Налоговая нагрузка",
         "Нормализованно Кол-во сотрудников",
         "Нормализованно Возможная сумма при 3%",
+        "Нормализованно Уставной капитал (руб)",
     ]
 
     min_norm = {prop: data[prop].min() for prop in norm_props}
@@ -106,6 +107,7 @@ def proccess(filePath, normalize, ocved, modelPath):
 
     data["Негативная информация"] = data["Негативная информация"].astype("category").cat.codes + 1
     data["Негативная информация"] = data["Негативная информация"].apply(lambda x: 1 if x != 0 else 0)
+
 
     # Вычисление отношения оборотов
     data["Отношение оборотов"] = np.where(
