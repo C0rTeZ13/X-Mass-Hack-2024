@@ -31,10 +31,10 @@ def getMinMax(normalizePath):
     return {"min": min_norm, "max": max_norm}
 
 
-def analys(data, model_path="catboost_model.cbm"):
+def analys(data, modelPath):
     # Загрузка модели
     model = CatBoostClassifier()
-    model.load_model(model_path)
+    model.load_model(modelPath)
 
     # Получение предсказаний
     predictions = model.predict(data)
@@ -43,7 +43,7 @@ def analys(data, model_path="catboost_model.cbm"):
     return predictions, probabilities
 
 
-def proccess(filePath, normalize, ocved):
+def proccess(filePath, normalize, ocved, modelPath):
     # Загрузка данных
     data = pd.read_excel(filePath)
     result_data = data
@@ -120,7 +120,7 @@ def proccess(filePath, normalize, ocved):
     data = data.drop(columns=norm_props)
 
     # Получение предсказаний
-    predictions, probabilities = analys(data)
+    predictions, probabilities = analys(data, modelPath)
 
     # Добавление предсказаний в данные
     result_data["Решение"] = np.where(predictions == 1, "Да", "Нет")
@@ -130,11 +130,12 @@ def proccess(filePath, normalize, ocved):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Usage: python script.py /path/to/input.xlsx /path/to/output.xlsx /path/to/min_max.csv /path/to/ocved.csv")
+    parser = argparse.ArgumentParser(description="Usage: python script.py /path/to/input.xlsx /path/to/output.xlsx /path/to/min_max.csv /path/to/ocved.csv /path/to/model")
     parser.add_argument("input_path", type=str, help="Path to the input file")
     parser.add_argument("output_path", type=str, help="Path to save the output file")
     parser.add_argument("min_max_path", type=str, help="Path to min_max file")
     parser.add_argument("ocved_path", type=str, help="Path to ocved file")
+    parser.add_argument("model_path", type=str, help="Path to model file")
     args = parser.parse_args()
 
     filePath = args.input_path
@@ -142,6 +143,8 @@ def main():
 
     minMaxPath = args.min_max_path
     ocvedPath = args.ocved_path
+
+    modelPath = args.model_path
 
     # Проверка наличия файлов
     if not os.path.exists(filePath):
@@ -163,7 +166,7 @@ def main():
     ocved = load_ocved(ocvedPath)
 
     # Обработка файла
-    result_data = proccess(filePath, normalize, ocved)
+    result_data = proccess(filePath, normalize, ocved, modelPath)
 
     if result_data is not None:
         # Сохранение результата

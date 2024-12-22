@@ -14,6 +14,7 @@ namespace ServiceLayer.Services
         private readonly string _pythonPath;
         private readonly string _minMaxPath;
         private readonly string _ocvedPath;
+        private readonly string _modelPath;
 
         public ScoringService(VbankcenterParserService parserService, IConfiguration configuration)
         {
@@ -22,6 +23,7 @@ namespace ServiceLayer.Services
             _pythonPath = configuration["PythonPath"];
             _minMaxPath = configuration["MinMaxPath"];
             _ocvedPath = configuration["OcvedPath"];
+            _modelPath = configuration["ModelPath"];
         }
 
         public async Task ComplementCompanyFile(string path)
@@ -47,7 +49,7 @@ namespace ServiceLayer.Services
 
         public async Task ExecuteScoring(string path)
         {
-            string arguments = $"\"{_scriptPath}\" \"{path}\" \"{path}\" \"{_minMaxPath}\" \"{_ocvedPath}\"";
+            string arguments = $"\"{_scriptPath}\" \"{path}\" \"{path}\" \"{_minMaxPath}\" \"{_ocvedPath}\" \"{_modelPath}\"";
 
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
